@@ -13,3 +13,5 @@
 12. [N Q branch n bound](https://shubhamvijaykar.github.io/ai-codes/Assi%204%20(N%20Queen%20branch%20n%20bound).ipynb)
 13. [N Q backtracking](https://shubhamvijaykar.github.io/ai-codes/Assi%204%20(N%20Queen%20problem%20backtracking).ipynb)
 14. [Chatbot](https://shubhamvijaykar.github.io/ai-codes/Assi%205%20(Chatbot).ipynb)
+15. [A4](https://shubhamvijaykar.github.io/ai-codesLP2_A4_305C061.ipynb)
+16. [A5](https://shubhamvijaykar.github.io/ai-codesLP2_A5(305C061).ipynb)
