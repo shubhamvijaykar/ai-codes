@@ -17,4 +17,4 @@
 16. [A5](https://shubhamvijaykar.github.io/ai-codes/LP2_A5(305C061).ipynb)
 
 #lp-4 codes
-1. [fib](https://github.com/shubhamvijaykar/ai-codes/1fb.ipynb)
+1. [fib](https://github.com/shubhamvijaykar/ai-codes/blob/main/1fb.ipynb)
