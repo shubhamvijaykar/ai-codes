@@ -1,0 +1,308 @@
+Logistic Regression
+
+import pandas as pd 
+import numpy as np
+from sklearn import preprocessing
+from sklearn.metrics import confusion_matrix
+from sklearn import svm
+import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
+import seaborn
+%matplotlib inline
+     
+
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+
+df_fraud = df[df['Class'] == 1] 
+plt.figure(figsize=(15,5))
+plt.scatter(df_fraud['Time'], df_fraud['Amount'])
+plt.title('Scratter plot amount fraud')
+plt.xlabel('Time')
+plt.ylabel('Amount')
+plt.xlim([0,175000])
+plt.ylim([0,2500])
+plt.show()
+     
+
+df.head()
+
+
+df.describe()
+nb_big_fraud = df_fraud[df_fraud['Amount'] > 1000].shape[0] # Recovery of frauds over 1000
+print('There are only {} frauds where the amount was bigger than 1000 over {} fraud
+
+Unbalanced Data
+
+number_fraud = len(data[data.Class == 1])
+number_no_fraud = len(data[data.Class == 0])
+print('There are only {}  frauds in the original dataset, even though there are 
+
+print("The accuracy of the classifier then would be : {} which is the number of go
+
+Correlation of the features
+
+df_corr = df.corr() # Pearson, Standard Correlation Coefficient
+     
+
+plt.figure(figsize=(6,5))
+seaborn.heatmap(df_corr, cmap='Blues')
+seaborn.set(font_scale=2,style='white')
+
+plt.title('Heatmap correlation')
+plt.show()
+     
+Data Selection
+UNDERSAMPLING
+
+# We seperate ours data in two groups : a train dataset and a test dataset
+
+# First we build our train dataset
+df_train_all = df[0:150000] # We divide the original dataset in two parts
+df_train_1 = df_train_all[df_train_all['Class'] == 1]
+df_train_0 = df_train_all[df_train_all['Class'] == 0]
+print('In this dataset, we have {} frauds so we need to take a similar number of non-fraud'.format(len(df_train_1)))
+
+df_sample=df_train_0.sample(300)
+df_train = df_train_1.append(df_sample) # We gather the frauds with the no frauds. 
+df_train = df_train.sample(frac=1) # Then we mix our dataset
+     
+In this dataset, we have 293 frauds so we need to take a similar number of non-fraud
+
+X_train = df_train.drop(['Time', 'Class'],axis=1) # We drop the features Time (useless), and the Class (label)
+y_train = df_train['Class'] # We create our label
+X_train = np.asarray(X_train)
+y_train = np.asarray(y_train)
+     
+
+# with all the test dataset to see if the model learn correctly
+df_test_all = df[150000:]
+
+X_test_all = df_test_all.drop(['Time', 'Class'],axis=1)
+y_test_all = df_test_all['Class']
+X_test_all = np.asarray(X_test_all)
+y_test_all = np.asarray(y_test_all)
+     
+
+Fucntion for Confusion Matrix
+
+class_names=np.array(['0','1']) # Binary label, Class = 1 (fraud) and Class = 0 (no fraud)
+     
+
+# Function to plot the confusion Matrix
+def plot_confusion_matrix(cm, classes,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = 'd' 
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+Applying Logistic Regression
+
+from sklearn.linear_model import LogisticRegression
+     
+
+classifier = LogisticRegression()
+     
+
+classifier.fit(X_train, y_train)
+
+pred = classifier.predict(X_train)
+     
+
+print ('Accuracy from sk-learn: {}'.format(classifier.score(X_train,y_train)))
+     
+Confusion Matrix
+
+cm = confusion_matrix(y_train, pred)
+plot_confusion_matrix(cm,class_names)
+     
+Precision, Recall, F1-Score, Mean Absolute Error, Mean Percentage Error and Mean Squared Error
+
+from sklearn.metrics import classification_report,mean_absolute_error,mean_squared_error,r2_score
+report= classification_report(y_train,pred)
+print(report)
+
+
+Undersampling using Synthetic Minority Oversampling Technique (SMOTE) approach
+
+from imblearn.over_sampling import SMOTE
+oversample=SMOTE()
+X_train,y_train= oversample.fit_resample(X_train,y_train)
+
+Applying Logistic Regression
+
+classifier.fit(X_train, y_train)
+
+
+print(classifier.intercept_, classifier.coef_)
+
+pred = classifier.predict(X_train)
+     
+Confusion Matrix
+
+cm = confusion_matrix(y_train, pred)
+plot_confusion_matrix(cm,class_names)
+
+
+Precision, Recall, F1-Score, Mean Absolute Error, Mean Percentage Error and Mean Squared Error
+
+report= classification_report(y_train,pred)
+print(report)
+
+mean_abs_error = mean_absolute_error(y_train,pred)
+mean_abs_percentage_error = np.mean(np.abs((y_train - pred) // y_train))
+mse= mean_squared_error(y_train,pred)
+r_squared_error = r2_score(y_train,pred)
+print("Mean absolute error : {} \nMean Absolute Percentage error : {}\nMean 
+Testing Error
+
+pred = classifier.predict(X_test_all)
+     
+
+print ('Accuracy from sk-learn: {}'.format(classifier.score(X_test_all,y_test_all)))
+
+Confusion Matrix
+
+cm = confusion_matrix(y_test_all, pred)
+plot_confusion_matrix(cm,class_names)
+     
+Precision, Recall, F1-Score, Mean Absolute Error, Mean Percentage Error and Mean Squared Error
+
+report= classification_report(y_test_all,pred)
+print(report)
+     
+mean_abs_error = mean_absolute_error(y_test_all,pred)
+mean_abs_percentage_error = np.mean(np.abs((y_test_all - pred) // y_test_all))
+mse= mean_squared_error(y_test_all,pred)
+r_squared_error = r2_score(y_test_all,pred)
+print("Mean absolute error : {} \nMean Absolute Percentage error : {}\nMean Squared Error : {}\nR Squared Error: {}".format(mean_abs_error,mean_abs_percentage_error,mse,np.abs(r_squared_error)/100))
+     
+
+Hyperparameter Tuning
+
+classifier_b = LogisticRegression(class_weight={0:0.6,1:0.4})
+     
+
+classifier_b.fit(X_train,y_train)
+
+pred_b = classifier_b.predict(X_test_all)
+     
+
+print(classifier_b.intercept_, classifier_b.coef_)
+
+
+print ('Accuracy from sk-learn after hyperpaarameter tuning: {}'.format(classifier
+
+Confusion Matrix
+
+cm = confusion_matrix(y_test_all, pred_b)
+plot_confusion_matrix(cm,class_names)
+
+
+Precision, Recall, F1-Score, Mean Absolute Error, Mean Percentage Error and Mean Squared Error
+
+report= classification_report(y_test_all,pred_b)
+print(report)
+
+mean_abs_error = mean_absolute_error(y_test_all,pred_b)
+mean_abs_percentage_error = np.mean(np.abs((y_test_all - pred_b) // y_test_all))
+mse= mean_squared_error(y_test_all,pred_b)
+r_squared_error = r2_score(y_test_all,pred_b)
+print("Mean absolute error : {} \nMean Absolute Percentage error : {}\nMean Squared Error : {}\nR Squared Error: {}".format(mean_abs_error,mean_abs_percentage_error,mse,np.abs(r_squared_error)/100))
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

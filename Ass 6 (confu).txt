@@ -1,0 +1,50 @@
+﻿from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,prediction)
+
+
+cm
+
+
+from sklearn.metrics import accuracy_score
+acc = accuracy_score(y_test,prediction)*100
+
+
+acc
+
+
+tp = cm[0,[0]]
+print('TRUE POSITIVE:',tp)
+
+
+
+
+fp = cm[0,[1]]
+print('FALSE POSITIVE:',fp)
+
+
+tn = cm[1,[1]]
+print('TRUE NEGATIVE:',tn)
+
+
+fn = cm[1,[0]]
+print('FALSE NEGATIVE:',fn)
+
+
+accuracy = (tn+tp)/(fp+tp+tn+fn)
+print('ACCURACY:',accuracy*100)
+
+
+error = ((fp+fn)/(tp+fp+tn+fn)) 
+print("ERROR RATE:",error*100)
+
+
+precision = tp/(tp+fp)
+print('PRECISION:',precision*100)
+
+
+recall = tp/(tp+fn) 
+print('RECALL:',recall*100)
+
+
+specificity = (tn)/(tn+fp)
+print('SPECIFICITY:',specificity*100)

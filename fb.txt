@@ -1,0 +1,54 @@
+def fib_iterative(n):
+    a = 0
+    b = 1
+    for _ in range(2, n):
+        print(a, end=" ")
+        c = a + b
+        a = b
+        b = c
+
+
+# fib_iterative(10)
+
+
+def fibonacci(num):
+    if num == 0:
+        return 0
+    elif num == 1 or num == 2:
+        return 1
+    else:
+        return fibonacci(num - 1) + fibonacci(num - 2)
+
+
+n = 10
+# print(fibonacci(n))
+fib_series = []
+
+for i in range(n):
+    fib_series.append(fibonacci(i))
+
+print(fib_series)
+
+
+
+
+
+************
+
+The provided code defines two functions, fib_iterative() and fibonacci(), for calculating the Fibonacci sequence.
+
+fib_iterative() Function:
+
+This function implements an iterative approach to calculate the Fibonacci sequence up to a specified number n. It initializes two variables, a and b, representing the first two terms in the sequence (0 and 1, respectively). It then iterates from 2 to n, calculating each subsequent term by adding the previous two terms. The function prints each term as it is calculated.
+
+fibonacci() Function:
+
+This function implements a recursive approach to calculate the Fibonacci sequence. It takes an integer num as input and returns the value of the Fibonacci sequence at that position. It utilizes a base case for num equal to 0 or 1, returning 0 and 1, respectively. For other values of num, it recursively calls itself for num-1 and num-2, adds the results, and returns the sum.
+
+Main Code:
+
+The main code calls the fib_iterative() function with n=10 to print the Fibonacci sequence up to 10 terms. It then creates an empty list fib_series and appends the value of fibonacci(i) for each value of i from 0 to 9 (inclusive). Finally, it prints the fib_series list.
+
+Overall Comparison:
+
+The fib_iterative() function is more efficient for calculating larger Fibonacci numbers due to its iterative approach, which avoids repeated function calls. The fibonacci() function, while correct, can become computationally expensive for larger n values due to the recursive calls.

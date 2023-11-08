@@ -1,0 +1,91 @@
+# Structure for an item which stores weight and
+# corresponding value of Item
+class Item:
+    def __init__(self, profit, weight):
+        self.profit = profit
+        self.weight = weight
+
+# Main greedy function to solve problem
+
+
+def fractionalKnapsack(W, arr):
+
+    # Sorting Item on basis of ratio
+    arr.sort(key=lambda x: (x.profit/x.weight), reverse=True)
+
+    # Result(value in Knapsack)
+    finalvalue = 0.0
+
+    # Looping through all Items
+    for item in arr:
+
+        # If adding Item won't overflow,
+        # add it completely
+        if item.weight <= W:
+            W -= item.weight
+            finalvalue += item.profit
+
+        # If we can't add current Item,
+        # add fractional part of it
+        else:
+            finalvalue += item.profit * W / item.weight
+            break
+
+    # Returning final value
+    return finalvalue
+
+
+# Driver Code
+if __name__ == "__main__":
+    W = 50
+    arr = [Item(60, 10), Item(100, 20), Item(120, 30)]
+
+    # Function call
+    max_val = fractionalKnapsack(W, arr)
+    print(max_val)
+
+# TC- > O(NlogN)   FOR SORTING
+# SC -> O(N) as no extra space is
+
+# OBJECTIVE IS THAT PROFIT SHOULD BE MAXXIMUM
+
+
+
+
+
+
+********
+Item Class: Defines a class Item to represent items with their respective profits and weights.
+
+fractionalKnapsack() Function: Implements the greedy algorithm to solve the fractional knapsack problem.
+
+a. Sorting Items: Sorts the items in descending order of their profit-to-weight ratio.
+
+b. Initializing Variables: Initializes variables finalvalue to store the total profit and W to represent the knapsack capacity.
+
+c. Iterating through Items: Iterates through the sorted items.
+
+ i. **Full Item Inclusion:** If an item's weight is less than or equal to the remaining knapsack capacity, it is fully included, and its profit is added to `finalvalue`.
+
+ ii. **Fractional Item Inclusion:** If an item's weight exceeds the remaining knapsack capacity, a fraction of the item is included, and its corresponding profit is calculated and added to `finalvalue`.
+d. Returning Maximum Profit: Returns the final maximum profit (finalvalue).
+
+Example Usage:
+
+The code provides an example of using the fractionalKnapsack() function to calculate the maximum profit for a given knapsack capacity and a set of items.
+
+Time and Space Complexity Analysis:
+
+Time Complexity: O(N log N) due to sorting the items based on their profit-to-weight ratio.
+
+Space Complexity: O(N) as no additional data structures are used beyond the input list of items.
+
+Objective:
+
+The objective of the fractional knapsack problem is to maximize the total profit obtained by filling a knapsack with a subset of items, where each item has a specific profit and weight, and the knapsack has a limited capacity.
+
+
+
+The Fractional Knapsack problem is a classic optimization problem where you are given a set of items, each with a weight and a value, and a knapsack with a maximum weight capacity. The goal is to determine the most valuable combination of items to include in the knapsack while not exceeding its weight capacity. It is a classic problem that can be solved using a greedy strategy.
+we first define an Item class to represent each item with its weight and value. The fractional_knapsack function takes a list of items and the knapsack capacity as input. It calculates the value-to-weight ratio for each item, sorts them in descending order of the ratio, and then iteratively selects items to include in the knapsack until the capacity is exhausted.The Fractional Knapsack problem is a classic optimization problem where you are given a set of items, each with a weight and a value, and a knapsack with a maximum weight capacity. The goal is to determine the most valuable combination of items to include in the knapsack while not exceeding its weight capacity. It is a classic problem that can be solved using a greedy strategy.
+we first define an Item class to represent each item with its weight and value. The fractional_knapsack function takes a list of items and the knapsack capacity as input. It calculates the value-to-weight ratio for each item, sorts them in descending order of the ratio, and then iteratively selects items to include in the knapsack until the capacity is exhausted.

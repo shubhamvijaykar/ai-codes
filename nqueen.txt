@@ -1,0 +1,87 @@
+def solveNQueens(n, initial_queen_position):
+    def is_valid(board, row, col):
+        # Check the column
+        for i in range(row):
+            if board[i][col] == 'Q':
+                return False
+
+        # Check the upper left diagonal
+        for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+            if board[i][j] == 'Q':
+                return False
+
+        # Check the upper right diagonal
+        for i, j in zip(range(row, -1, -1), range(col, n)):
+            if board[i][j] == 'Q':
+                return False
+
+        return True
+
+    def backtrack(row):
+        if row == n:
+            res.append(["".join(row) for row in board])
+            return
+
+        for col in range(n):
+            if (row, col) == initial_queen_position:
+                continue  # Skip the specified initial position
+
+            if is_valid(board, row, col):
+                board[row][col] = 'Q'
+                backtrack(row + 1)
+                board[row][col] = '.'
+
+    initial_row, initial_col = initial_queen_position
+    res = []
+    board = [['.' for _ in range(n)] for _ in range(n)]
+    backtrack(0)
+
+    return res
+
+
+# Ask the user for the initial queen's position
+initial_row = int(
+    input("Enter the initial row for the first queen (0 to 7): "))
+initial_col = int(
+    input("Enter the initial column for the first queen (0 to 7): "))
+initial_queen_position = (initial_row, initial_col)
+
+solutions = solveNQueens(8, initial_queen_position)
+
+for solution in solutions:
+    for row in solution:
+        print(row)
+    print()
+
+
+
+
+*********
+The code is divided into two main functions: solveNQueens() and backtrack(). The solveNQueens() function orchestrates the overall solution process, while the backtrack() function recursively explores the placement of queens on the chessboard.
+
+solveNQueens() Function:
+
+Input Handling: Receives the chessboard size (n) and the initial queen's position (initial_queen_position).
+
+Initialization: Creates an empty list (res) to store solutions and a 2D list (board) to represent the chessboard.
+
+Recursive Backtracking: Calls the backtrack() function starting from the first row (0).
+
+Returning Solutions: Returns the list of valid solutions (res) after backtracking completes.
+
+backtrack() Function:
+
+Base Case Check: Checks if it has reached the last row (n). If so, it appends the current board state (board) to the solutions list (res).
+
+Column Iteration: Iterates over all columns in the current row.
+
+Skipping Initial Position: Skips the position specified by initial_queen_position to enforce the initial placement.
+
+Validity Check: Calls the is_valid() function to check if placing a queen at the current position is valid.
+
+Queen Placement: If valid, places a queen ('Q') at the current position.
+
+Recursive Call: Recursively calls backtrack() to explore the next row.
+
+Undo Placement: Removes the queen ('Q') from the current position for backtracking.
+

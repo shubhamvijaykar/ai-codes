@@ -1,0 +1,119 @@
+﻿import pandas as pd
+
+
+df = pd.read_csv("/Users/sajalpriya/Downloads/ml dataset/emails (1).csv")
+df
+
+
+df.describe()
+
+
+df.info()
+
+
+df.isnull().sum()
+
+
+df.dtypes
+
+
+df.columns
+
+
+df.size
+
+
+df.shape
+
+
+df.drop(columns='Email No.',inplace=True)
+
+
+df.head(3)
+
+
+#SPLITTING DATASET
+
+
+#INDEPENDENT VARIABLE
+x=df.iloc[:, :df.shape[1]-1] 
+x
+
+
+#dependent variables
+y=df.iloc[:, -1] 
+y
+
+
+#TRAINGING MODEL
+
+
+from sklearn.model_selection import train_test_split
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+
+
+x_train
+
+
+#KNN IMPLEMENTATION
+
+
+from sklearn.neighbors import KNeighborsClassifier
+
+
+model = KNeighborsClassifier(n_neighbors=3)
+model
+
+
+model.fit(x_train,y_train)
+
+
+y_pred = model.predict(x_test)
+y_pred
+
+
+y_test
+
+
+# Support Vector Machine
+from sklearn.svm import SVC
+svm = SVC(kernel='linear')
+svm.fit(x_train, y_train)
+
+
+svm_pred = svm.predict(x_test)
+svm_pred
+
+
+## Performance Analysis
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+
+knn_accuracy = accuracy_score(y_test, y_pred)
+knn_conf_matrix = confusion_matrix(y_test, y_pred)
+knn_class_report = classification_report(y_test, y_pred)
+
+
+svm_accuracy = accuracy_score(y_test, svm_pred)
+svm_conf_matrix = confusion_matrix(y_test, svm_pred)
+svm_class_report = classification_report(y_test, svm_pred)
+
+
+print("K-Nearest Neighbors:")
+
+
+print(f"Accuracy: {knn_accuracy}")
+
+
+print("Confusion Matrix:")
+
+
+print(knn_conf_matrix)
+
+
+print("Classification Report:")
+
+
+print(knn_class_report)

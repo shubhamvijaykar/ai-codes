@@ -1,0 +1,70 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+
+df=pd.read_csv('/Users/shubhamvijaykar/Documents/DSBDA lab/datasets/titanic1.csv')
+df
+df=df.drop(['Cabin'],axis=1)
+df.dropna()
+df.isnull().sum()
+
+sns.countplot(x='Sex',data=df)
+sns.countplot('Survived',data=df,color='green')
+df['Sex'].value_counts().plot(kind='pie',autopct='%.4f')
+
+
+df['Survived'].value_counts().plot(kind='pie',autopct='%.2f')
+
+
+plt.figure(figsize=(10,10))
+df['Age'].value_counts().plot(kind='pie')
+
+sns.barplot(df['Survived'],df['Age'])
+
+
+
+sns.barplot(df['Sex'],df['Age'],df['Survived'])
+
+sns.boxplot(df['Sex'],df['Age'])
+
+sns.boxplot(df['Sex'],df['Age'],df['Survived'])
+sns.violinplot(df['Sex'],df['Age'],df='Survived')
+sns.violinplot(x=df['Fare'],y=df['Sex'])
+
+sns.violinplot(df['Sex'],df['Age'],df['Survived'])
+corr=df.corr()
+sns.heatmap(corr)
+
+pd.crosstab(df['Sex'],df['Survived'])
+
+
+pd.crosstab(df['Survived'],df['Age'])
+
+sns.heatmap(pd.crosstab(df['Sex'],df['Survived']))
+
+sns.heatmap(pd.crosstab(df['Age'],df['Survived']))
+
+
+sns.heatmap(pd.crosstab(df['Age'],df['Survived']))
+
+sns.heatmap(pd.crosstab(df['Age'],df['Sex']))
+
+
+sns.heatmap(pd.crosstab(df['Sex'],df['Survived']))
+
+sns.heatmap(pd.crosstab(df['Survived'],df['Age']))S
+
+
+
+
+
+
+
+
+
+
+
+
+

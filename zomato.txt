@@ -1,0 +1,444 @@
+import pandas as pd
+# import pandas.testing as pt
+import numpy as np
+import re
+import random
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.offline as py
+from plotly.offline import iplot
+import plotly.express as px
+import plotly.graph_objects as go
+from wordcloud import WordCloud
+from scipy.stats import ttest_ind
+%matplotlib inline
+
+Lets take a look at our data:
+zomato.info()
+
+After a quick look at the columns of the dataframe, I have decided to remove some columns which will not be very useful in the Data Analysis process like url, address, phone, menu_item and location as they are redundant.
+
+zomato = zomato.iloc[:,np.r_[2:7,9:14,15:17]]
+
+After slicing off the unwanted columns, below is the final list of columns:
+
+# zomato.columns
+set(zomato)
+
+Now lets extract just the ratings of the restaurants from the reviews_list column which will be used later to fill in the missing values in rate column:
+avg = []
+for i in range(len(zomato)):
+    l = list(map(int, re.findall(r'%s(\d+)' % 'Rated ',zomato['reviews_list'][i])))
+    if len(l) >0:
+        avg.append(round(sum(l)/len(l), 2))
+    else:
+        avg.append(0)   
+
+zomato['review_rates'] = pd.Series(avg)
+
+Now lets make the rate column more appropriate for Analysis by converting it to float type and removing '/5' from the rating"
+rate = []
+for index, data in enumerate(zomato.rate):
+    if (data is not np.nan) & (data != 'NEW') & (data != '-'):
+        rate.append(float(data.split('/')[0]))
+    else:
+        rate.append(data)
+zomato['rate'] = pd.Series(rate)
+
+Also Renaming our column names to more appropriate names:
+zomato.rename(columns={'cuisines' : 'Cuisine', 'listed_in(city)': 'Locality', 'listed_in(type)' : 'Listed_Type', 'approx_cost(for two people)': 'Approx_Cost', 'name': 'Name', 'rest_type':'Restaurant_Type', 'rate' : 'Rating', 'votes' : 'Total_Votes', 'online_order': 'Online_Order','book_table':'Table_Booking', 'dish_liked' : 'Dishes_Liked' }, inplace = True)
+zomato.columns
+
+Dropping all Nans, Nulls and non-numeric characters from the dataset:
+# Lets drop the data points with na and 0 rates:
+zomato.drop(zomato[(zomato['review_rates'] == 0) & (zomato['Rating'].isna())].index, inplace=True)
+# Replacing NaNs and '-' of rate with review rate values:
+zomato['Rating'] = np.where(zomato.Rating.isna(), zomato.review_rates, zomato.Rating)
+zomato['Rating'] = np.where(zomato['Rating'] == '-', zomato.review_rates, zomato.Rating)
+#After dropping Nas 
+zomato.head()
+
+# Lets save the newly opened restaurants in new DF before removing them:
+zomato_New = zomato[zomato['Rating'] == 'NEW']
+zomato.drop(zomato.Rating[zomato.Rating == 'NEW'].index, inplace=True)
+# We have few columns with NaNs so lets drop these 
+print("Approx_Cost column has {} Nan values and Cuisine column has {} Nan values, 
+
+zomato.dropna(subset=['Approx_Cost', 'Cuisine'], inplace = True)
+#Dropping Reviews List and review_rates since we have used it to fill our Rating column and we dont need these:
+zomato.drop(['reviews_list','review_rates'], axis =1, inplace=True)
+zomato.head()
+
+Now lets convert Rating, Approx_Cost to numeric data type and Remove the non- ascii characters from Name column.
+# print(type(zomato['Approx_Cost'][0]))
+zomato['Rating'] = zomato['Rating'].apply(pd.to_numeric)
+zomato['Approx_Cost'].replace(',', '',regex=True, inplace=True)
+zomato['Approx_Cost'] = zomato['Approx_Cost'].apply(pd.to_numeric)
+zomato['Name'].replace({r'[^\x00-\x7F]+':''}, regex = True, inplace=True)
+# type(zomato['Approx_Cost'][0])
+zomato.head()
+
+So now we can say that our DataFrame is clean and ready for Analysis. Lets take a quick look at our data info:
+zomato.info()
+
+2. EDA - Visualization
+Q) How many restaurants provide option of ordering online?
+fig1, ax1 = plt.subplots(figsize=(6,5));
+ax1.pie(zomato.Online_Order.value_counts().values, autopct = '%1.1f%%', shadow=True);
+ax1.legend(zomato.Online_Order.value_counts().index,
+          loc="lower right")
+ax1.axis('equal');
+ax1.set_title('Number of restaunrants with online ordering');
+
+We see that almost 65% of the restaurants have the online ordering facility, as it is one the major source of income
+
+# def func(pct, val):
+#     abs1 = int(val/100*np.sum(val))
+#     return '{.1f}%'.format(abs1)
+
+# lambda pct: func(pct, zomato.online_order)
+# ax = zomato.online_order.value_counts().plot.pie(y = zomato.online_order.value_counts().values,figsize=(10,5));
+Q) How many restaurants provide table booking, how are they different from the ones that dont?
+zomato.Table_Booking.value_counts().plot.bar();
+plt.title('Number of restaurants with online table booking');
+plt.xticks(rotation = 0);
+
+So here we see that most of the restaurants don't provide table booking option. They are very few, only around 5k out of almost 50k total so Lets look at the kind of restaurants these are.
+
+plt.figure(figsize=(10,6))
+ax = zomato[zomato['Table_Booking'] == 'Yes'].Restaurant_Type.value_counts(ascending = True).tail(20).plot.barh(y = 'Restaurant_Type');
+plt.xlabel('Number of Restaurants')
+plt.title('Distribution of Types of Restaurants with Table Booking option');
+ylab = zomato[zomato['Table_Booking'] == 'Yes'].Restaurant_Type.value_counts(ascending = True).tail(20).values
+for i, v in enumerate(ylab):
+  ax.text(v+50, i-0.25, np.around(v/sum(ylab)*100,2), color='black',  fontsize =
+We can see from the graph that More than 55% of the restaurants with Table Booking option available are Casual Dining type and 9% are Cafes.
+
+Lets check the average rating of Restaurants with and without Table Booking facility:
+
+print(zomato[zomato['Table_Booking'] == 'No'].Rating.describe())
+print("The average rating of the restaurants without table booking option is 3.6
+
+print(zomato[zomato['Table_Booking'] == 'Yes'].Rating.describe())
+print("There are 6k restaurants with table booking facility and have an average ra
+
+print("The minimum cost at restaurants with table booking is Rs.{} while the mini
+
+Hypothesis Testing (T-Test for comparing means of two groups.)
+Do Restaurants with Table Booking actually receive higher rating? Lets test this hypothesis.
+
+H0 : The mean rating of restaurants with table booking facility is same as mean rating of restaurants without the facility of booking table.
+H1 : The mean rating of restaurants with table booking facility is geater than mean rating of restaurants without the facility of booking table.
+
+H
+: 
+
+H
+: 
+
+Conditions for Hypothesis Testing: - 1) Samples Are Random - 2) It is less than 10% of the population - 3) It can be considered normal as the size is larger than 30.
+
+rand_Rate_Booking_No = pd.Series(random.sample(list(zomato[zomato['Table_Booking'] == 'No'].Rating), 40))
+rand_Rate_Booking_Yes = pd.Series(random.sample(list(zomato[zomato['Table_Booking'] == 'Yes'].Rating), 30))
+print('Statistics of a random sample of restaurants without table booking facility:')
+rand_Rate_Booking_No.describe()
+
+print('Statistics of a random sample of restaurants with table booking facility:')
+rand_Rate_Booking_Yes.describe()
+
+
+#Definitions of variables used in calculation of Test Statistic:
+x1 = rand_Rate_Booking_Yes.mean()
+x2 = rand_Rate_Booking_No.mean()
+mu_1 = pd.Series(zomato[zomato['Table_Booking'] == 'Yes'].Rating).mean()
+mu_2 = pd.Series(zomato[zomato['Table_Booking'] == 'No'].Rating).mean()
+n1 = len(rand_Rate_Booking_Yes)
+n2 = len(rand_Rate_Booking_No)
+sd_1 = rand_Rate_Booking_Yes.std()
+sd_2 = rand_Rate_Booking_No.std()
+df = min((n1 - 1), (n2 - 1))
+
+#However we will use the function to calculate out p - value:
+t_stat, p = ttest_ind(rand_Rate_Booking_Yes,rand_Rate_Booking_No)
+print('After running the T-test we get that:')
+print('test statistic is', t_stat)
+print('and p-Value is', p)
+
+
+if (p < 0.05):
+    print("Since P-value is lesser than significance level of 0.05, we reject the Null Hypothesis and Hence there is enough evidence that The mean rating of restaurants with table booking facility is geater than mean rating of restaurants without the facility of booking table. However we can not claim causal as there are other lurking variables.")
+else:
+    print("Since p-value is greater than significance level of 0.05, we fail to 
+
+
+Lets now take a final look at the rate distributions of restaurants with and without table booking:
+plt.figure(figsize=(30,10))
+plt.subplot(1,2,1)
+sns.countplot(zomato[zomato['Table_Booking'] == 'Yes']['Approx_Cost'])
+plt.xticks(rotation = 60)
+plt.title('Rate distribution of restaurants with Booking table option');
+plt.subplot(1,2,2)
+# plt.figure(figsize=(20,5))
+sns.countplot(zomato[zomato['Table_Booking'] == 'No']['Approx_Cost'])
+plt.xticks(rotation = 60)
+plt.title('Rate distribution of restaurants without Booking table option');
+
+Q) What are kind of Restaurants with higher meal cost?
+print(zomato[zomato['Approx_Cost'] > 3000]['Restaurant_Type'].value_counts())
+print('Restaurants with cost higher than 3000 are under Fine Dining. Average cost 
+
+Q) What are the most popular restaurants type around bangalore?
+plt.figure(figsize=(10, 6))
+zomato.Restaurant_Type.value_counts(ascending=True).tail(20).plot.barh();
+plt.title('Distribution of Restaurant types:');
+
+z1 = zomato[zomato['Restaurant_Type'] == 'Quick Bites']['Name'].value_counts().head(20).reset_index().rename(columns = {'index': 'Restaunrant_Name', 'Name':'Count'})
+plt.figure(figsize=(10,10))
+sns.barplot(y= 'Restaunrant_Name', x = 'Count', data = z1);
+
+Q) What are the various restaurants types with respect to the type of services they provide?
+trace = go.Bar(x = zomato.Listed_Type.value_counts().keys(),
+              y = zomato.Listed_Type.value_counts(),
+              text = zomato.Listed_Type)
+data = [trace]
+layout = go.Layout(title = 'Distribution of Restaurants by Service Type', yaxis = dict(title = 'Number of Restaurants'))
+fig = go.Figure(data = data, layout= layout)
+py.iplot(fig);
+
+Delivery is most popular and adopted by most of the restaurants!
+
+plt.figure(figsize = (15,10));
+# cmap = sns.cubehelix_palette(dark=.3, light=.8, as_cmap=True)
+sns.scatterplot(x='Name', y='Approx_Cost', s=40, data = zomato, hue = 'Listed_Type', style = 'Listed_Type', palette='Set2');
+plt.xticks('Off')
+plt.title('Distribution of Approx_Cost across all Restaurants', size= 18);
+
+Dine-out is more spread out from low cost to high cost meals restaurants.
+
+z = zomato['Dishes_Liked'].dropna()
+c1 = ' '.join([text for text in z])
+plt.figure(figsize=(10,10))
+wordcloud = WordCloud(background_color = 'white', collocations = False, width=1500, height=1500).generate(c1)
+plt.imshow(wordcloud)
+plt.axis('off')
+plt.title('Most popular Dishes in Bengaluru', size = 20)
+plt.show()
+
+We can see that the most popular dishes are Chicken, Biryani followed by Burger and Pizza.
+
+c2 = ' '.join([st for st in zomato['Cuisine']])
+plt.figure(figsize=(10,10))
+wordcloud = WordCloud(background_color = 'white', collocations = True, width=1500, height=1500).generate(c2)
+plt.imshow(wordcloud)
+plt.axis('off')
+plt.title('Most popular Cuisines in Bengaluru', size = 20)
+plt.show()
+
+Q) What are the most popular places for restaurants in bangalore?
+plt.figure(figsize=(10,10))
+zomato.Locality.value_counts(ascending=True).plot.barh();
+
+plt.figure(figsize=(10,5))
+# zomato.Approx_Cost.plot.hist()
+sns.distplot(zomato.Approx_Cost)
+# plt.xticks(np.arange(0, 4500, 500))
+plt.xlim(0, 6000)
+plt.xlabel('Approx. Cost for two')
+plt.title("The Cost distribution");
+
+
+plt.figure(figsize=(10,5))
+# zomato.Rating.plot.hist();
+sns.distplot(zomato.Rating);
+
+plt.figure(figsize=(10,6));
+zomato.Name.value_counts(ascending = True).tail(20).plot.barh();
+
+Plot for Votes V/S Rate:
+trace = go.Scatter(x = zomato['Rating'], y = zomato['Total_Votes'], textposition = 'top center', text = zomato['Name'], mode = 'markers')
+data1 = [trace]
+layout = go.Layout(title = 'Votes v/s Rating', xaxis = dict(title = 'Average Rate'), yaxis = dict(title = 'Total no. of Votes'))
+fig = go.Figure(data = data1, layout = layout)
+py.iplot(fig);
+
+
+Lets see the relationship between Rating and Cost of meal at a restaurant
+
+trace = go.Scatter(x = zomato['Rating'], y = zomato['Approx_Cost'], mode = 'markers', text = zomato['Name'])
+data = [trace]
+layout = go.Layout(title = 'Rating v/s Cost of meal at the restaurant', xaxis = dict(title = 'Rate'), yaxis = dict(title = 'Approx_Cost'))
+fig = go.Figure(data = data, layout = layout)
+py.iplot(fig);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

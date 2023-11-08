@@ -1,0 +1,146 @@
+﻿import pandas as pd
+
+
+df =pd.read_csv("/Users/sajalpriya/Downloads/ml dataset/diabetes.csv")
+df
+
+
+df.head()
+
+
+df.describe()
+
+
+df.info()
+
+
+df.isnull().sum()
+
+
+df.columns
+
+
+df.dtypes
+
+
+df.size
+
+
+df.shape
+
+
+df.hist(figsize=(20,16))
+
+
+df.boxplot(figsize=(15,10))
+
+
+#Spliting dataset
+
+
+#independent variables
+x=df.iloc[:, :df.shape[1]-1] 
+x
+
+
+#dependent variables
+y=df.iloc[:, -1] 
+y
+
+
+#training model
+from sklearn.model_selection import train_test_split
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+
+
+x_train
+
+
+x_test
+
+
+x_train.shape
+
+
+x_test.shape
+
+
+y_train
+
+
+y_train.shape
+
+
+#data tranformation
+from sklearn.preprocessing import StandardScaler
+
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+
+
+x_train
+x_test
+
+
+#KNN implementation
+from sklearn.neighbors import KNeighborsClassifier
+
+
+model = KNeighborsClassifier(n_neighbors=5, p=2)
+model
+
+
+y_pred=model.fit(x_train, y_train).predict(x_test)
+y_pred
+
+
+y_test
+
+
+#Metrix Evaluation
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+
+accuracy = accuracy_score(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
+cr = classification_report(y_test, y_pred)
+
+
+print("Accuracy for K-Nearest Neighbors model : ",accuracy)
+print('\nClassification report : \n\n', cr)
+print('\nConfusion matrix : \n\n', cm)
+
+
+from sklearn.model_selection import GridSearchCV
+
+
+param_grid = {
+ 'n_neighbors': range(1, 51),
+ 'p': range(1, 4)
+}
+
+
+grid = GridSearchCV(estimator=KNeighborsClassifier(), param_grid=param_grid, cv=5)
+grid.fit(x_train, y_train)
+grid.best_estimator_, grid.best_params_, grid.best_score_
+
+
+new_model = KNeighborsClassifier(n_neighbors=34, p=2)
+
+
+y_pred1 = new_model.fit(x_train, y_train).predict(x_test)
+y_pred
+
+
+accuracy1 = accuracy_score(y_test, y_pred1)
+cm1 = confusion_matrix(y_test, y_pred1)
+cr1 = classification_report(y_test, y_pred1)
+
+
+print("Accuracy for K-Nearest Neighbors model : ",accuracy1)
+print('\nClassification report : \n\n', cr1)
+print('\nConfusion matrix : \n\n', cm1)

@@ -1,0 +1,92 @@
+# Python3 implementation of QuickSort
+
+
+# Function to find the partition position
+def partition(array, low, high):
+
+	# Choose the rightmost element as pivot
+	pivot = array[high]
+
+	# Pointer for greater element
+	i = low - 1
+
+	# Traverse through all elements
+	# compare each element with pivot
+	for j in range(low, high):
+		if array[j] <= pivot:
+
+			# If element smaller than pivot is found
+			# swap it with the greater element pointed by i
+			i = i + 1
+
+			# Swapping element at i with element at j
+			(array[i], array[j]) = (array[j], array[i])
+
+	# Swap the pivot element with
+	# the greater element specified by i
+	(array[i + 1], array[high]) = (array[high], array[i + 1])
+
+	# Return the position from where partition is done
+	return i + 1
+
+
+# Function to perform quicksort
+def quicksort(array, low, high):
+	if low < high:
+
+		# Find pivot element such that
+		# element smaller than pivot are on the left
+		# element greater than pivot are on the right
+		pi = partition(array, low, high)
+
+		# Recursive call on the left of pivot
+		quicksort(array, low, pi - 1)
+
+		# Recursive call on the right of pivot
+		quicksort(array, pi + 1, high)
+
+
+# Driver code
+if __name__ == '__main__':
+	array = [10, 7, 8, 9, 1, 5]
+	N = len(array)
+
+	# Function call
+	quicksort(array, 0, N - 1)
+	print('Sorted array:')
+	for x in array:
+		print(x, end=" ")
+
+# This code is contributed by Adnan Aliakbar
+
+
+
+Time Complexity:
+
+Best Case: Ω (N log (N))
+The best-case scenario for quicksort occur when the pivot chosen at the each step divides the array into roughly equal halves.
+In this case, the algorithm will make balanced partitions, leading to efficient Sorting.
+Average Case: θ ( N log (N))
+Quicksort’s average-case performance is usually very good in practice, making it one of the fastest sorting Algorithm.
+Worst Case: O(N2)
+The worst-case Scenario for Quicksort occur when the pivot at each step consistently results in highly unbalanced partitions. When the array is already sorted and the pivot is always chosen as the smallest or largest element. To mitigate the worst-case Scenario, various techniques are used such as choosing a good pivot (e.g., median of three) and using Randomized algorithm (Randomized Quicksort ) to shuffle the element before sorting.
+Auxiliary Space: O(1), if we don’t consider the recursive stack space. If we consider the recursive stack space then, in the worst case quicksort could make O(N).
+Advantages of Quick Sort:
+It is a divide-and-conquer algorithm that makes it easier to solve problems.
+It is efficient on large data sets.
+It has a low overhead, as it only requires a small amount of memory to function.
+Disadvantages of Quick Sort:
+It has a worst-case time complexity of O(N2), which occurs when the pivot is chosen poorly.
+It is not a good choice for small data sets.
+It is not a stable sort, meaning that if two elements have the same key, their relative order will not be preserved in the sorted output in case of quick sort, because here we are swapping elements according to the pivot’s position (without considering their original positions).
+
+Feeling lost in the world of random DSA topics, wasting time without progress? It's time for a change! Join our DSA course, where we'll guide you on an exciting journey to master DSA efficiently and on schedule.
+Ready to dive in? Explore our Free Demo Content and join our DSA course, trusted by over 100,000 geeks!
+DSA in C++
+DSA in Java
+DSA in Python
+DSA in JavaScript
+
+Last Updated : 16 Oct, 2023
+
+
